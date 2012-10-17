@@ -1,0 +1,54 @@
+body {
+    margin: auto; /* center in viewport */
+    width: 960px;
+    height: 100%;
+/*    border: 1px solid #C0C0C0; */
+    border-radius: 8px;
+    margin-top: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#nav {
+    width: 200px;
+}
+
+#main {
+    width: 760px;
+    margin-bottom: 25px;
+}
+
+#header{
+    font-size: 30px;
+}
+
+#keyword-holder{
+    display: inline;
+}
+#keyword{
+    width: 300px;
+    margin-right: 25px;
+}
+
+#suggest{
+    display: inline;
+    color: #0066CC;
+}
+
+#error{
+    display: none;
+    color: red;
+}
+
+#video-player{
+    margin: 50px 0px 20px 0px;
+    clear: both;
+}
+
+#video-title{
+    font-size: 110%;
+    margin: 10px 0;
+    font-weight: bold;
+    width: 450px;
+    text-align: justify;
+    word-wrap: normal;
+}
