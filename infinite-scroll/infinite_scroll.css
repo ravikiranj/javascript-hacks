@@ -90,3 +90,14 @@ fieldset, img {
     text-align: center;
     display: none;
 }
+.error{
+    color: red;
+    border: 1px solid #C0C0C0;
+    border-radius: 4px;
+    text-align: center;
+    margin: auto;
+    padding: 25px;
+    width: 600px;
+    font-size: 16px;
+    margin-top: 100px;
+}

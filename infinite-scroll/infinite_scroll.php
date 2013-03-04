@@ -37,16 +37,24 @@ HTML;
     }else {
         $html = "";
     }
-    foreach($data as $item){
-        $itemId = $itemp['id'];
-        $username = $item['user']['name'];
-        $userid = $item['user']['screen_name'];
-        $userphoto = $item['user']['profile_image_url'];
-        $tweetText = $item['text'];
-        //Sun Jun 26 08:14:00 +0000 2011"
-        list($D, $M, $d, $h, $m, $s, $z, $y) = sscanf($item['created_at'], "%3s %3s %2d %2d:%2d:%2d %5s %4d ");
-        $tweetTime = $M . " " . $d; 
+    if(!empty($data) && !empty($data['error'])){
         $html .= <<<HTML
+    <div class="error">
+        <p>Sorry, error encountered, please try again after sometime.</p>
+        <p>Error: {$data['error']}</p>
+    </div>
+HTML;
+    }else{
+        foreach($data as $item){
+            $itemId = $item['id'];
+            $username = $item['user']['name'];
+            $userid = $item['user']['screen_name'];
+            $userphoto = $item['user']['profile_image_url'];
+            $tweetText = $item['text'];
+            //Sun Jun 26 08:14:00 +0000 2011"
+            list($D, $M, $d, $h, $m, $s, $z, $y) = sscanf($item['created_at'], "%3s %3s %2d %2d:%2d:%2d %5s %4d ");
+            $tweetTime = $M . " " . $d; 
+            $html .= <<<HTML
 <div class="stream-item">
     <div class="stream-item-content tweet">
         <div class="tweet-image">
@@ -73,20 +81,22 @@ HTML;
     </div>
 </div>
 HTML;
+        }
     }
+
     if(!$xhr) {
     $html .= <<<HTML
         </div>
         </div>
         <div id="loading-gif">
-            <!--<img src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/loading.gif"></img>-->
-            <img src="loading.gif"></img>
+            <img src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/loading.gif"></img>
+            <!--<img src="loading.gif"></img>-->
         </div>
         <div id="maxitems">Maximum (200) no. of items reached, please refresh the page</div>
     <!-- JS -->
     <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js"></script>
-    <!--<script src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/infinite_scroll.js"></script>-->
-    <script src="infinite_scroll.js"></script>
+    <script src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/infinite_scroll.js"></script>
+    <!--<script src="infinite_scroll.js"></script>-->
     </body>
 </html>
 HTML;
