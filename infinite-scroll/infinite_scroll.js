@@ -1,9 +1,9 @@
 YUI().use('node', 'event', 'io-base', function(Y){
     var updateInitiated;
     var page;
-    var intervalId = null;
     var retries;
     var maxRetries;
+    var allTweetsFetched;
 
     function init(){
         var self = this;
@@ -12,6 +12,7 @@ YUI().use('node', 'event', 'io-base', function(Y){
         this.page = 2;
         this.retries = 0;
         this.maxRetries = 3;
+        this.allTweetsFetched = false;
         window.onscroll = handleScroll;
     }  
 
@@ -31,7 +32,7 @@ YUI().use('node', 'event', 'io-base', function(Y){
             scrollPos = window.pageYOffset;
         }   
         //Check if scroll bar position is just 50px above the max, if yes, initiate an update
-        if(pageHeight - (scrollPos + clientHeight) < 50 && this.retries < this.maxRetries){
+        if(pageHeight - (scrollPos + clientHeight) < 50 && this.retries < this.maxRetries && !this.allTweetsFetched){
             this.updateInitiated = true;
             var offset = Y.all(".stream-container .stream-items .stream-item").size();
             //Stop updating once 200 items are reached
@@ -53,8 +54,14 @@ YUI().use('node', 'event', 'io-base', function(Y){
                         args.self.page += 1;
                         args.self.retries = 0;
                         var resp = o.responseText;
-                        var list = Y.one(".stream-container .stream-items"); 
-                        list.set('innerHTML', list.get('innerHTML')+resp);
+                        var regex = "/No more tweets/";
+                        if(!resp.match(regex)){
+                            args.self.allTweetsFetched = true;
+                            Y.one("#no_more_tweets").setStyle('display', 'block'); 
+                        }else{
+                            var list = Y.one(".stream-container .stream-items"); 
+                            list.set('innerHTML', list.get('innerHTML')+resp);
+                        }
                         Y.one("#loading-gif").setStyle("display", "none");
                     },  
                     failure: function(id, o, args){
@@ -74,4 +81,3 @@ YUI().use('node', 'event', 'io-base', function(Y){
     }
     init();
 });
-

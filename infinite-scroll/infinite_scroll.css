@@ -80,7 +80,7 @@ fieldset, img {
     margin-top: 5px;
     text-align: center;
 }
-#maxitems{
+#maxitems, #no_more_tweets{
     color: red;
     font-size: 16px;
     margin-left: 20px;
