@@ -54,8 +54,8 @@ YUI().use('node', 'event', 'io-base', function(Y){
                         args.self.page += 1;
                         args.self.retries = 0;
                         var resp = o.responseText;
-                        var regex = "/No more tweets/";
-                        if(!resp.match(regex)){
+                        var regex = /No more tweets/;
+                        if(resp.match(regex)){
                             args.self.allTweetsFetched = true;
                             Y.one("#no_more_tweets").setStyle('display', 'block'); 
                         }else{
