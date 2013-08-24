@@ -9,7 +9,7 @@ YUI().use('node', 'event', 'io-base', function(Y){
         var self = this;
         //Initialize updateInitiated flag and pagination unit
         this.updateInitiated = false;
-        this.offset = 220;
+        this.offset = 20;
         this.retries = 0;
         this.maxRetries = 3;
         this.allStoriesFetched = false;
