@@ -1,22 +1,23 @@
 <?php
 /**
-* Function to get Twitter User timeline
+* Function to get RSS Feed Items
 *
 * @param String $user, Integer $page
 * @return object response
 */
-function getTwitterUserTimeline($user, $page) {
-    $url = "http://api.twitter.com/1/statuses/user_timeline.json?screen_name=" . $user . "&page=" . $page;
+function getRSSFeedItems($limit, $offset) {
+    $baseURL = "http://query.yahooapis.com/v1/public/yql?";
+    $query = "select title,link,pubDate from rss where url='http://rss.news.yahoo.com/rss/topstories' limit ${limit} offset {$offset}";
+    $url = $baseURL . "format=json&q=" . urlencode($query);
     $session = curl_init($url);
     curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($session, CURLOPT_VERBOSE, true);
     $json = curl_exec($session);
     curl_close($session);
     return json_decode($json, true);
 }
 
 /**
-* Function to build twitter timeline markup
+* Function to build RSS item markup
 *
 * @param Array $data, Boolean $xhr
 * @return String $html 
@@ -24,10 +25,9 @@ function getTwitterUserTimeline($user, $page) {
 function displayHTML($data, $xhr) {
     if(!$xhr){
         $html = <<<HTML
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">        
+<!DOCTYPE html>
 <html>
     <head><title>Infinite Scrolling using native Javascript and YUI3</title>
-    <!--<link rel="stylesheet" href="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/infinite_scroll.css" type="text/css">-->
     <link rel="stylesheet" href="infinite_scroll.css" type="text/css">
     <body>
 	<div class="tip">Scroll to the bottom of the page to see the infinite scrolling concept working</div>
@@ -37,46 +37,39 @@ HTML;
     }else {
         $html = "";
     }
-//    var_dump($data);
     if(!empty($data) && !empty($data['error'])){
+        $errorDesc = "";
+        if(!empty($data['error']['description'])) {
+            $errorDesc = "<p>Error: " . $data['error']['description'] . "</p>";
+        }
         $html .= <<<HTML
     <div class="error">
         <p>Sorry, error encountered, please try again after sometime.</p>
-        <p>Error: {$data['error']}</p>
+        {$errorDesc}
     </div>
 HTML;
     }else{
-        if(!empty($data)){
+        //Extract the results
+        if(!empty($data) && !empty($data['query']) && !empty($data['query']['results']) && !empty($data['query']['results']['item'])){
+            $data = $data['query']['results']['item'];
             foreach($data as $item){
-                $itemId = $item['id'];
-                $username = $item['user']['name'];
-                $userid = $item['user']['screen_name'];
-                $userphoto = $item['user']['profile_image_url'];
-                $tweetText = $item['text'];
-                //Sun Jun 26 08:14:00 +0000 2011"
-                list($D, $M, $d, $h, $m, $s, $z, $y) = sscanf($item['created_at'], "%3s %3s %2d %2d:%2d:%2d %5s %4d ");
-                $tweetTime = $M . " " . $d; 
+                if(empty($item['title']) || empty($item['link']) || empty($item['pubDate'])) {
+                    return;
+                }
+                $title = $item['title'];
+                $link = $item['link'];
+                $pubDate = $item['pubDate'];
                 $html .= <<<HTML
 <div class="stream-item">
-    <div class="stream-item-content tweet">
-        <div class="tweet-image">
-            <img class="user-profile-link" width="48" height="48" alt="{$username}" src="{$userphoto}" />
-        </div>
-        <div class="tweet-content">
-            <div class="tweet-row">
-                <span class="tweet-user-name">
-                    <a class="tweet-screen-name user-profile-link" title="{$username}" href="http://twitter.com/{$userid}" target="_blank">{$userid}</a>
-                    <span class="tweet-full-name">{$username}</span>
-                </span>
+    <div class="stream-item-content rss-headline">
+        <div class="rss-content">
+            <img class="rss-image" alt="rss icon" src="rss.png" />
+            <div class="rss-row">
+                <a href="${link}" target="_blank">$title</a>
             </div>
-            <div class="tweet-row">
-                <div class="tweet-text">
-                    {$tweetText}
-                </div>
-            </div>
-            <div class="tweet-row">
-                <div class="tweet-timestamp">
-                    {$tweetTime}
+            <div class="rss-row">
+                <div class="rss-timestamp">
+                    {$pubDate}
                 </div>
             </div>
         </div>
@@ -85,7 +78,7 @@ HTML;
 HTML;
             }
         }else{
-            $html .= "No more tweets";
+            $html .= "No more top stories";
         }
     }
 
@@ -94,14 +87,12 @@ HTML;
         </div>
         </div>
         <div id="loading-gif">
-            <!--<img src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/loading.gif"></img>-->
             <img src="loading.gif"></img>
         </div>
         <div id="maxitems">Maximum (200) no. of items reached, please refresh the page</div>
-        <div id="no_more_tweets">No more tweets left to fetch</div>
+        <div id="no_more_rss">No more rss headlines left to fetch</div>
     <!-- JS -->
     <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.3.0/build/yui/yui-min.js"></script>
-    <!--<script src="http://ravikiranj.net/drupal/sites/all/hacks/infinite-scroll/infinite_scroll.js"></script>-->
     <script src="infinite_scroll.js"></script>
     </body>
 </html>
@@ -111,14 +102,14 @@ HTML;
 }
 
 function init(){
-    $user = "ravikiranj";
-    $page = 1;
+    $offset = 0;
     $xhr = false;
-    if(!empty($_GET['page'])){
-        $page = $_GET['page'];
+    if(!empty($_GET['offset'])){
+        $offset = $_GET['offset'];
         $xhr = true;
     }
-    $data = getTwitterUserTimeline($user, $page);
+    $limit = 20;
+    $data = getRSSFeedItems($limit, $offset);
     $markup = displayHTML($data, $xhr);
     echo $markup;
 }
@@ -126,4 +117,3 @@ function init(){
 //Call init
 init();
 ?>
-
