@@ -9,7 +9,7 @@ YUI().use('node', 'event', 'io-base', function(Y){
         var self = this;
         //Initialize updateInitiated flag and pagination unit
         this.updateInitiated = false;
-        this.offset = 10;
+        this.offset = 220;
         this.retries = 0;
         this.maxRetries = 3;
         this.allStoriesFetched = false;
@@ -51,7 +51,7 @@ YUI().use('node', 'event', 'io-base', function(Y){
                 on:{
                     success: function(id, o, args){
                         //Update pagination unit
-                        args.self.offset += 10;
+                        args.self.offset += 20;
                         args.self.retries = 0;
                         var resp = o.responseText;
                         var regex = /No more top stories/;
